@@ -115,6 +115,7 @@ exports = module.exports = function historyApiFallback(options) {
   rewriteTarget = options.index || '/index.html';
   logger('Rewriting', req.method, req.url, 'to', rewriteTarget);
   // 重写url
+console.log('重写了')
   req.url = rewriteTarget;
   // 此时再将执行权交给下一个中间件（url都换成index.html了，后面的路由等中间件也不会再处理了，然后前端接收到html就开始解析路由了，目的达到！）
   next();
