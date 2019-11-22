@@ -4,6 +4,9 @@ const path = require('path');
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const logger = require('morgan');
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
 
 const admin = require('./routes/admin');
 const article = require('./routes/article');
@@ -17,6 +20,15 @@ db.once('open',() => console.log('Mongo connection successed'));
 
 
 const app = express();
+
+//创建http服务器
+const pem = fs.readFileSync(path.join(__dirname, './https/2628741_xcpeng.cn.pem'), 'utf8');
+const keys = fs.readFileSync(path.join(__dirname, './https/2628741_xcpeng.cn.key'), 'utf8');
+const httpServe = http.createServer(app);
+// const httpsServe =  https.createServer({key:keys,cert:pem},app);
+
+
+
 app.use(cors());//跨域
 app.use(logger('dev'));
 app.use(express.json({ limit: "5mb" }));
@@ -51,4 +63,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+//监听服务
+const port = 80;
+httpServe.listen(port);
+// httpsServe.listen(port);
