@@ -1,6 +1,105 @@
 const db = require("../models/db");
 const express = require("express");
+const common = require("../util/common");
 const router = express.Router();
+
+//创建tags
+const creatTags = article => {
+  const category = article.category;
+  const tagem = {
+    title: article.title,
+    date: article.date,
+    _id: article.id
+  };
+  category.forEach(item => {
+    db.Tags.findOne({ name: item }, function(err, res) {
+      if (err) return;
+      if (!res) {
+        let Tag = new db.Tags({
+          name: item,
+          type: "xcp",
+          articles: [tagem],
+          total: 1
+        });
+        Tag.save(function(err) {
+          if (err) return;
+          console.log("文章tags保存成功");
+        });
+        return;
+      }
+      res.name = item;
+      if (res.articles.length) {
+        res.articles.push(tagem);
+      } else {
+        res.articles = [tagem];
+      }
+      res.total ? (res.total += 1) : (res.total = 1);
+      db.Tags.update(
+        { name: item },
+        { articles: res.articles, total: res.total },
+        { multi: true },
+        function(err, res1) {
+          if (err) {
+            console.log(err, "保存失败");
+            return;
+          }
+          console.log(res1, "文章tags保存成功");
+        }
+      );
+    });
+  });
+};
+//更新tags
+const updateTags = (compare, info) => {
+  if (compare.add.length) {
+    creatTags({
+      title: info.title,
+      date: info.date,
+      _id: info._id,
+      category: compare.add
+    });
+  }
+
+  if (compare.del.length) {
+    compare.del.forEach(item => {
+      db.Tags.findOne({ name: item }, function(err, res) {
+        if (err) return;
+        if (res) {
+          oldInfo = res.articles.filter((item, index) => {
+            if (item._id == info._id) {
+              res.articles.splice(index, 1);
+              return true;
+            }
+          });
+          if (!oldInfo.length) return;
+          if (oldInfo.length) res.total -= 1;
+          db.Tags.update(
+            { name: item },
+            { articles: res.articles, total: res.total },
+            { multi: true },
+            function(err, res1) {
+              if (err) {
+                console.log(err, "删除失败");
+                return;
+              }
+              console.log(res1, "文章tags删除成功");
+            }
+          );
+        }
+      });
+    });
+  }
+};
+//获取分类接口
+router.post("/api/tagList", (req, res) => {
+  db.Tags.find({}, (err, data) => {
+    if (err) {
+      res.send(err);
+      return;
+    }
+    res.send({ status: 200, data: data });
+  });
+});
 
 //获取所有文章列表
 router.post("/api/articleList", (req, res) => {
@@ -104,7 +203,13 @@ router.get("/api/articleDetail/:id", function(req, res) {
     }
     let prev = {};
     let next = {};
-
+    docs.read ? docs.read += 1 : docs.read = 1;
+    db.Article(docs).save(function(err){
+      if(err) {
+        console.error(err);
+        return;
+      }
+    })
     db.Article.find({ _id: { $gt: req.params.id } }) //上一条
       .then(res2 => {
         if (res2.length > 0) {
@@ -131,12 +236,13 @@ router.get("/api/articleDetail/:id", function(req, res) {
 //文章保存
 router.post("/api/admin/saveArticle", (req, res) => {
   let newArticle = new db.Article(req.body.articleInformation);
-  newArticle.save(function(err) {
+  newArticle.save(function(err, article) {
     if (err) {
       res.send(err);
     } else {
       res.send({ status: 1, msg: "保存成功" });
     }
+    creatTags(article);
   });
 });
 // 文章更新
@@ -146,6 +252,7 @@ router.post("/api/admin/updateArticle", (req, res) => {
     if (err) {
       return;
     }
+    const compare = common.compare(docs[0].category, info.category);
     docs[0].title = info.title;
     docs[0].date = info.date;
     docs[0].category = info.category;
@@ -158,17 +265,22 @@ router.post("/api/admin/updateArticle", (req, res) => {
         return;
       }
       res.send({ status: 1, msg: "更新成功" });
+      updateTags(compare, info);
     });
   });
 });
 // 文章删除
 router.post("/api/admin/deleteArticle", (req, res) => {
-  db.Article.remove({ _id: req.body._id }, err => {
-    if (err) {
-      res.status(500).send();
-      return;
-    }
-    res.send({ status: 1, msg: "删除成功" });
+  db.Article.findOne({ _id: req.body._id }, function(err, article) {
+    if (err) return;
+    db.Article.remove({ _id: req.body._id }, (err, c, b) => {
+      if (err) {
+        res.status(500).send();
+        return;
+      }
+      res.send({ status: 1, msg: "删除成功" });
+      updateTags({ add: [], del: article.category }, article);
+    });
   });
 });
 //评论--新建

@@ -10,6 +10,7 @@ const fs = require("fs");
 
 const admin = require("./routes/admin");
 const article = require("./routes/article");
+const comment = require("./routes/comment");
 const history = require("./routes/history");
 
 //链接数据库
@@ -48,25 +49,26 @@ app.set("view engine", "jade");
 app.use(express.static(path.join(__dirname, "public")));
 
 //history重定向
-app.use(
-  history({
-    rewrites:[
-      {
-        from: "/archive",
-        to: "/api/articleList"
-      },
-      {
-        from: "/tags",
-        to: "/api/articleList"
-      }
-    ],
-    logger:console.log
-  })
-);
+// app.use(
+//   history({
+//     rewrites:[
+//       {
+//         from: "/archive",
+//         to: "/api/articleList"
+//       },
+//       {
+//         from: "/tags",
+//         to: "/api/articleList"
+//       }
+//     ],
+//     logger:console.log
+//   })
+// );
 
 //路由
 app.use(admin);
 app.use(article);
+app.use(comment);
 
 //404响应
 app.use(function(req, res, next) {
