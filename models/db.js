@@ -17,7 +17,8 @@ const articleSchema = new mongoose.Schema({
   gist: String,
   content: String,
   comments: Array,
-  read:Number
+  read:Number,
+  zan:Number
 });
 //demo
 const demoSchema = new mongoose.Schema({
