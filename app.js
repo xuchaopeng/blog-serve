@@ -8,10 +8,12 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 
+
 const admin = require("./routes/admin");
 const article = require("./routes/article");
 const comment = require("./routes/comment");
 const history = require("./routes/history");
+const upload = require("./routes/upload");
 
 //链接数据库
 const mongoose = require("mongoose");
@@ -23,16 +25,10 @@ db.once("open", () => console.log("Mongo connection successed"));
 const app = express();
 
 //创建http服务器
-const pem = fs.readFileSync(
-  path.join(__dirname, "./https/2628741_xcpeng.cn.pem"),
-  "utf8"
-);
-const keys = fs.readFileSync(
-  path.join(__dirname, "./https/2628741_xcpeng.cn.key"),
-  "utf8"
-);
-const httpServe = http.createServer(app);
-// const httpsServe =  https.createServer({key:keys,cert:pem},app);
+let httpsOption = {
+  key: fs.readFileSync("./https/2628741_xcpeng.cn.key"),
+  cert: fs.readFileSync("./https/2628741_xcpeng.cn.pem")
+};
 
 app.use(cors()); //跨域
 app.use(logger("dev"));
@@ -48,27 +44,12 @@ app.set("view engine", "jade");
 //资源
 app.use(express.static(path.join(__dirname, "public")));
 
-//history重定向
-// app.use(
-//   history({
-//     rewrites:[
-//       {
-//         from: "/archive",
-//         to: "/api/articleList"
-//       },
-//       {
-//         from: "/tags",
-//         to: "/api/articleList"
-//       }
-//     ],
-//     logger:console.log
-//   })
-// );
-
 //路由
 app.use(admin);
 app.use(article);
 app.use(comment);
+app.use(upload);
+app.use(history);
 
 //404响应
 app.use(function(req, res, next) {
@@ -87,6 +68,5 @@ app.use(function(err, req, res, next) {
 });
 
 //监听服务
-const port = 8090;
-httpServe.listen(port);
-// httpsServe.listen(port);
+http.createServer(app).listen(80);
+https.createServer(httpsOption, app).listen(443);
