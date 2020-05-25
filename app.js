@@ -68,5 +68,5 @@ app.use(function(err, req, res, next) {
 });
 
 //监听服务
-http.createServer(app).listen(80);
+http.createServer(app).listen(8090);
 https.createServer(httpsOption, app).listen(443);

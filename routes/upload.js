@@ -29,11 +29,12 @@ router.post("/api/upload", function (req, res) {
     const fileNewName = time + num + extname;
     const oldname = filepath;
     const newname = form.uploadDir + fileNewName;
+    const url = `//${req.hostname}/images/${fileNewName}`;
     fs.rename(oldname, newname, (err) => {
       if (err) {
-        res.json({ code: 200, data: { name: fileNewName, path: newname } });
+        res.json({ code: 200, data: { name: fileNewName, path: url } });
       } else {
-        res.json({ code: 200, data: { name: fileNewName, path: newname } });
+        res.json({ code: 200, data: { name: fileNewName, path: url } });
       }
     });
 
