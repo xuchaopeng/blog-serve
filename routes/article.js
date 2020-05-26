@@ -4,24 +4,24 @@ const common = require("../util/common");
 const router = express.Router();
 
 //创建tags
-const creatTags = article => {
+const creatTags = (article) => {
   const category = article.category;
   const tagem = {
     title: article.title,
     date: article.date,
-    _id: article.id
+    _id: article.id,
   };
-  category.forEach(item => {
-    db.Tags.findOne({ name: item }, function(err, res) {
+  category.forEach((item) => {
+    db.Tags.findOne({ name: item }, function (err, res) {
       if (err) return;
       if (!res) {
         let Tag = new db.Tags({
           name: item,
           type: "xcp",
           articles: [tagem],
-          total: 1
+          total: 1,
         });
-        Tag.save(function(err) {
+        Tag.save(function (err) {
           if (err) return;
           console.log("文章tags保存成功");
         });
@@ -38,7 +38,7 @@ const creatTags = article => {
         { name: item },
         { articles: res.articles, total: res.total },
         { multi: true },
-        function(err, res1) {
+        function (err, res1) {
           if (err) {
             console.log(err, "保存失败");
             return;
@@ -56,13 +56,13 @@ const updateTags = (compare, info) => {
       title: info.title,
       date: info.date,
       _id: info._id,
-      category: compare.add
+      category: compare.add,
     });
   }
 
   if (compare.del.length) {
-    compare.del.forEach(item => {
-      db.Tags.findOne({ name: item }, function(err, res) {
+    compare.del.forEach((item) => {
+      db.Tags.findOne({ name: item }, function (err, res) {
         if (err) return;
         if (res) {
           oldInfo = res.articles.filter((item, index) => {
@@ -77,7 +77,7 @@ const updateTags = (compare, info) => {
             { name: item },
             { articles: res.articles, total: res.total },
             { multi: true },
-            function(err, res1) {
+            function (err, res1) {
               if (err) {
                 console.log(err, "删除失败");
                 return;
@@ -90,11 +90,24 @@ const updateTags = (compare, info) => {
     });
   }
 };
-//获取分类接口
+//获取所有分类接口
 router.post("/api/tagList", (req, res) => {
   db.Tags.find({}, (err, data) => {
     if (err) {
       res.send(err);
+      return;
+    }
+    res.send({ status: 200, data: data });
+  });
+});
+
+//获取某分类新闻
+router.get("/api/tagListPage", (req, res) => {
+  const param = req.query;
+  const tag = param.tag || "ES6";
+  db.Tags.find({ name: tag }).exec((err, data) => {
+    if (err) {
+      res.send({ status: 404, msg: "服务器异常" });
       return;
     }
     res.send({ status: 200, data: data });
@@ -124,9 +137,9 @@ router.post("/api/articleList", (req, res) => {
                 _id: data[i]["_id"],
                 date: data[i]["date"],
                 title: data[i]["title"],
-                category: data[i]["category"]
-              }
-            ]
+                category: data[i]["category"],
+              },
+            ],
           };
           data_archives.push(obj);
           arr.push(date);
@@ -135,7 +148,7 @@ router.post("/api/articleList", (req, res) => {
             _id: data[i]["_id"],
             date: data[i]["date"],
             title: data[i]["title"],
-            category: data[i]["category"]
+            category: data[i]["category"],
           };
           for (let i = 0; i < data_archives.length; i++) {
             if (data_archives[i]["type"] == date) {
@@ -162,9 +175,9 @@ router.post("/api/articleList", (req, res) => {
                   _id: data[i]["_id"],
                   date: data[i]["date"],
                   title: data[i]["title"],
-                  category: data[i]["category"]
-                }
-              ]
+                  category: data[i]["category"],
+                },
+              ],
             };
             data_categories.push(obj);
             arr.push(cates[i2]);
@@ -173,7 +186,7 @@ router.post("/api/articleList", (req, res) => {
               _id: data[i]["_id"],
               date: data[i]["date"],
               title: data[i]["title"],
-              category: data[i]["category"]
+              category: data[i]["category"],
             };
             for (let i3 = 0; i3 < data_categories.length; i3++) {
               if (data_categories[i3]["type"] == cates[i2]) {
@@ -194,30 +207,61 @@ router.post("/api/articleList", (req, res) => {
     }
   });
 });
+
+//文章分页接口
+router.get("/api/articlePage", (req, res) => {
+  const param = req.query;
+  const num = param.num ? Number(param.num) : 5;
+  if (param._id) {
+    db.Article.find({ _id: { $lt: param._id } })
+      .limit(num)
+      .sort({ _id: -1 })
+      .exec((err, data) => {
+        if (err) {
+          res.send({ status: 404, msg: "服务器异常" });
+          return;
+        }
+        res.send({ status: 200, data: data });
+      });
+  } else {
+    db.Article.find({})
+      .limit(num)
+      .sort({ _id: -1 })
+      .exec((err, data) => {
+        console.log(data);
+        if (err) {
+          res.send({ status: 404, msg: "服务器异常" });
+          return;
+        }
+        res.send({ status: 200, data: data });
+      });
+  }
+});
+
 // 文章详情页
-router.get("/api/articleDetail/:id", function(req, res) {
-  db.Article.findOne({ _id: req.params.id }, function(err, docs) {
+router.get("/api/articleDetail/:id", function (req, res) {
+  db.Article.findOne({ _id: req.params.id }, function (err, docs) {
     if (err) {
       console.error(err);
       return;
     }
     let prev = {};
     let next = {};
-    docs.read ? docs.read += 1 : docs.read = 1;
-    db.Article(docs).save(function(err){
-      if(err) {
+    docs.read ? (docs.read += 1) : (docs.read = 1);
+    db.Article(docs).save(function (err) {
+      if (err) {
         console.error(err);
         return;
       }
-    })
+    });
     db.Article.find({ _id: { $gt: req.params.id } }) //上一条
-      .then(res2 => {
+      .then((res2) => {
         if (res2.length > 0) {
           prev.title = res2[0]["title"];
           prev._id = res2[0]["_id"];
         }
         db.Article.find({ _id: { $lt: req.params.id } }) //下一条
-          .then(res3 => {
+          .then((res3) => {
             if (res3.length > 0) {
               next.title = res3[res3.length - 1]["title"];
               next._id = res3[res3.length - 1]["_id"];
@@ -228,7 +272,7 @@ router.get("/api/articleDetail/:id", function(req, res) {
             res.send(obj);
           });
       })
-      .catch(rej => {
+      .catch((rej) => {
         console.log(rej);
       });
   });
@@ -236,7 +280,7 @@ router.get("/api/articleDetail/:id", function(req, res) {
 //文章保存
 router.post("/api/admin/saveArticle", (req, res) => {
   let newArticle = new db.Article(req.body.articleInformation);
-  newArticle.save(function(err, article) {
+  newArticle.save(function (err, article) {
     if (err) {
       res.send(err);
     } else {
@@ -259,7 +303,7 @@ router.post("/api/admin/updateArticle", (req, res) => {
     docs[0].gist = info.gist;
     docs[0].content = info.content;
     docs[0].html = info.html;
-    db.Article(docs[0]).save(function(err) {
+    db.Article(docs[0]).save(function (err) {
       if (err) {
         res.status(500).send();
         return;
@@ -271,7 +315,7 @@ router.post("/api/admin/updateArticle", (req, res) => {
 });
 // 文章删除
 router.post("/api/admin/deleteArticle", (req, res) => {
-  db.Article.findOne({ _id: req.body._id }, function(err, article) {
+  db.Article.findOne({ _id: req.body._id }, function (err, article) {
     if (err) return;
     db.Article.remove({ _id: req.body._id }, (err, c, b) => {
       if (err) {
@@ -284,18 +328,18 @@ router.post("/api/admin/deleteArticle", (req, res) => {
   });
 });
 //文章点赞
-router.post('/api/article/zan',(req,res) => {
-  db.Article.find({_id:req.body._id},(err,docs) => {
-    if(err)return;
-    if(!docs[0])return;
-    docs[0].zan ? docs[0].zan += 1 : docs[0].zan = 1;
-    db.Article(docs[0]).save(function(err) {
+router.post("/api/article/zan", (req, res) => {
+  db.Article.find({ _id: req.body._id }, (err, docs) => {
+    if (err) return;
+    if (!docs[0]) return;
+    docs[0].zan ? (docs[0].zan += 1) : (docs[0].zan = 1);
+    db.Article(docs[0]).save(function (err) {
       if (err) {
         res.status(500).send();
         return;
       }
       res.send({ status: 1, msg: "文章点赞成功" });
     });
-  })
-})
+  });
+});
 module.exports = router;
