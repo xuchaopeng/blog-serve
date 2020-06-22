@@ -2,7 +2,11 @@ const db = require("../models/db");
 const express = require("express");
 const common = require("../util/common");
 const router = express.Router();
-
+//创建索引
+db.Article.createIndexes({
+  title:'text',
+  content:'text'
+});
 //创建tags
 const creatTags = (article) => {
   const category = article.category;
@@ -236,6 +240,66 @@ router.get("/api/articlePage", (req, res) => {
         res.send({ status: 200, data: data });
       });
   }
+});
+
+//文章搜索接口 按照阅读、评论数、点赞数排序发放数据 -- ***** 评论数暂时用 阅读量来替代
+router.get("/api/article/search",(req,res) => {
+  const param = req.query;
+  const num = param.num ? Number(param.num) : 5;
+  const pgnum = param.pgnum ? Number(param.pgnum) : 1;
+  const type = param.type ? param.type : 'read';
+  const sIndex = (pgnum - 1) * num;
+  const eIndex = sIndex + num;
+  if(type === 'read') {
+    db.Article.find({}).sort({read:-1}).exec((err,data) => {
+      if(err) {
+        res.send({status:200,data:null});
+        return;
+      }
+      if(sIndex <= data.length) {
+        res.send({status:200,data:data.slice(sIndex,eIndex)})
+      } else {
+        res.send({status:200,data:[]})
+      }
+    })
+  } else if (type === 'zan') {
+    db.Article.find({}).sort({zan:-1}).exec((err,data) => {
+      if(err) {
+        res.send({status:200,data:null});
+        return;
+      }
+      if(sIndex <= data.length) {
+        res.send({status:200,data:data.slice(sIndex,eIndex)})
+      } else {
+        res.send({status:200,data:[]})
+      }
+    })
+  } else {
+    db.Article.find({}).sort({read:-1}).exec((err,data) => {
+      if(err) {
+        res.send({status:200,data:null});
+        return;
+      }
+      if(sIndex <= data.length) {
+        res.send({status:200,data:data.slice(sIndex,eIndex)})
+      } else {
+        res.send({status:200,data:[]})
+      }
+    })
+  }
+});
+
+//文章关键词搜索
+router.get("/api/article/keywords",(req,res) => {
+  const param = req.query;
+  const kw = param.kw;
+  db.Article.find({$text:{$search:'MongoDB'}}).sort({ _id: -1 }).exec((err,data) => {
+    if(!err) {
+      res.send({status:200,data:null,msg:'失败'});
+      return;
+    }
+    res.send({status:200,data:data,msg:'成功'});
+  })
 });
 
 // 文章详情页
