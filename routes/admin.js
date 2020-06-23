@@ -142,7 +142,6 @@ router.post("/api/admin/updateUser", (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            console.log("写入成功！", saveImg);
             docs[0].nickName = req.body.nickName;
             docs[0].avatar = pathImg;
             db.User(docs[0]).save(function(err) {

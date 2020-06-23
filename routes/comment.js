@@ -5,16 +5,13 @@ const router = express.Router();
 //评论--新建
 router.post("/api/comment/new", (req, res) => {
   db.Article.find({ _id: req.body._id }, (err, docs) => {
-    console.log(docs[0],'aaaaaa');
     if (err) {
       return;
     }
-    console.log(docs[0],'bbbbbbb');
     let { id, from_uid, from_uname, avatar, content, date } = req.body;
     let obj = { id, from_uid, from_uname, avatar, content, date, child: [] };
 
     docs[0].comments.push(obj);
-    console.log(docs[0],'cccccccc');
     db.Article(docs[0]).save(function(err) {
       if (err) {
         res.status(500).send();

@@ -1,12 +1,7 @@
-const db = require("../models/db");
-const express = require("express");
-const common = require("../util/common");
+const db = require('../models/db');
+const express = require('express');
+const common = require('../util/common');
 const router = express.Router();
-//创建索引
-db.Article.createIndexes({
-  title:'text',
-  content:'text'
-});
 //创建tags
 const creatTags = (article) => {
   const category = article.category;
@@ -21,13 +16,12 @@ const creatTags = (article) => {
       if (!res) {
         let Tag = new db.Tags({
           name: item,
-          type: "xcp",
+          type: 'xcp',
           articles: [tagem],
           total: 1,
         });
         Tag.save(function (err) {
           if (err) return;
-          console.log("文章tags保存成功");
         });
         return;
       }
@@ -44,10 +38,8 @@ const creatTags = (article) => {
         { multi: true },
         function (err, res1) {
           if (err) {
-            console.log(err, "保存失败");
             return;
           }
-          console.log(res1, "文章tags保存成功");
         }
       );
     });
@@ -83,10 +75,10 @@ const updateTags = (compare, info) => {
             { multi: true },
             function (err, res1) {
               if (err) {
-                console.log(err, "删除失败");
+                // console.log(err, '删除失败');
                 return;
               }
-              console.log(res1, "文章tags删除成功");
+              // console.log(res1, '文章tags删除成功');
             }
           );
         }
@@ -95,7 +87,7 @@ const updateTags = (compare, info) => {
   }
 };
 //获取所有分类接口
-router.post("/api/tagList", (req, res) => {
+router.post('/api/tagList', (req, res) => {
   db.Tags.find({}, (err, data) => {
     if (err) {
       res.send(err);
@@ -106,12 +98,12 @@ router.post("/api/tagList", (req, res) => {
 });
 
 //获取某分类新闻
-router.get("/api/tagListPage", (req, res) => {
+router.get('/api/tagListPage', (req, res) => {
   const param = req.query;
-  const tag = param.tag || "ES6";
+  const tag = param.tag || 'ES6';
   db.Tags.find({ name: tag }).exec((err, data) => {
     if (err) {
-      res.send({ status: 404, msg: "服务器异常" });
+      res.send({ status: 404, msg: '服务器异常' });
       return;
     }
     res.send({ status: 200, data: data });
@@ -119,29 +111,29 @@ router.get("/api/tagListPage", (req, res) => {
 });
 
 //获取所有文章列表
-router.post("/api/articleList", (req, res) => {
+router.post('/api/articleList', (req, res) => {
   db.Article.find({}, (err, data) => {
     if (err) {
       res.send(err);
       return;
     }
-    if (req.body.type == "archives") {
+    if (req.body.type == 'archives') {
       //archives结构
       let arr = [];
       let data_archives = [];
 
       for (let i = 0; i < data.length; i++) {
-        let date = data[i]["date"].slice(0, 4);
+        let date = data[i]['date'].slice(0, 4);
 
         if (arr.indexOf(date) == -1) {
           let obj = {
             type: date,
             list: [
               {
-                _id: data[i]["_id"],
-                date: data[i]["date"],
-                title: data[i]["title"],
-                category: data[i]["category"],
+                _id: data[i]['_id'],
+                date: data[i]['date'],
+                title: data[i]['title'],
+                category: data[i]['category'],
               },
             ],
           };
@@ -149,26 +141,26 @@ router.post("/api/articleList", (req, res) => {
           arr.push(date);
         } else {
           let obj = {
-            _id: data[i]["_id"],
-            date: data[i]["date"],
-            title: data[i]["title"],
-            category: data[i]["category"],
+            _id: data[i]['_id'],
+            date: data[i]['date'],
+            title: data[i]['title'],
+            category: data[i]['category'],
           };
           for (let i = 0; i < data_archives.length; i++) {
-            if (data_archives[i]["type"] == date) {
-              data_archives[i]["list"].push(obj);
+            if (data_archives[i]['type'] == date) {
+              data_archives[i]['list'].push(obj);
             }
           }
         }
       }
       res.send(data_archives);
-    } else if (req.body.type == "categories") {
+    } else if (req.body.type == 'categories') {
       //categories结构
       let arr = [];
       let data_categories = [];
 
       for (let i = 0; i < data.length; i++) {
-        let cates = data[i]["category"];
+        let cates = data[i]['category'];
 
         for (let i2 = 0; i2 < cates.length; i2++) {
           if (arr.indexOf(cates[i2]) == -1) {
@@ -176,10 +168,10 @@ router.post("/api/articleList", (req, res) => {
               type: cates[i2],
               list: [
                 {
-                  _id: data[i]["_id"],
-                  date: data[i]["date"],
-                  title: data[i]["title"],
-                  category: data[i]["category"],
+                  _id: data[i]['_id'],
+                  date: data[i]['date'],
+                  title: data[i]['title'],
+                  category: data[i]['category'],
                 },
               ],
             };
@@ -187,14 +179,14 @@ router.post("/api/articleList", (req, res) => {
             arr.push(cates[i2]);
           } else {
             let obj = {
-              _id: data[i]["_id"],
-              date: data[i]["date"],
-              title: data[i]["title"],
-              category: data[i]["category"],
+              _id: data[i]['_id'],
+              date: data[i]['date'],
+              title: data[i]['title'],
+              category: data[i]['category'],
             };
             for (let i3 = 0; i3 < data_categories.length; i3++) {
-              if (data_categories[i3]["type"] == cates[i2]) {
-                data_categories[i3]["list"].push(obj);
+              if (data_categories[i3]['type'] == cates[i2]) {
+                data_categories[i3]['list'].push(obj);
               }
             }
           }
@@ -204,8 +196,8 @@ router.post("/api/articleList", (req, res) => {
     } else {
       //article结构
       for (let i = 0; i < data.length; i++) {
-        data[i]["comments"] = data[i]["comments"].length;
-        data[i]["content"] = null;
+        data[i]['comments'] = data[i]['comments'].length;
+        data[i]['content'] = null;
       }
       res.send(data);
     }
@@ -213,7 +205,7 @@ router.post("/api/articleList", (req, res) => {
 });
 
 //文章分页接口
-router.get("/api/articlePage", (req, res) => {
+router.get('/api/articlePage', (req, res) => {
   const param = req.query;
   const num = param.num ? Number(param.num) : 5;
   if (param._id) {
@@ -222,7 +214,7 @@ router.get("/api/articlePage", (req, res) => {
       .sort({ _id: -1 })
       .exec((err, data) => {
         if (err) {
-          res.send({ status: 404, msg: "服务器异常" });
+          res.send({ status: 404, msg: '服务器异常' });
           return;
         }
         res.send({ status: 200, data: data });
@@ -232,9 +224,8 @@ router.get("/api/articlePage", (req, res) => {
       .limit(num)
       .sort({ _id: -1 })
       .exec((err, data) => {
-        console.log(data);
         if (err) {
-          res.send({ status: 404, msg: "服务器异常" });
+          res.send({ status: 404, msg: '服务器异常' });
           return;
         }
         res.send({ status: 200, data: data });
@@ -242,68 +233,122 @@ router.get("/api/articlePage", (req, res) => {
   }
 });
 
+//文章按分类搜索
+router.get('/api/article/tag', (req,res) => {
+  const param = req.query;
+  const num = param.num ? Number(param.num) : 5;
+  const pgnum = param.pgnum ? Number(param.pgnum) : 1;
+  const tag = param.tag || '';
+  let reg = new RegExp(tag, 'gi');
+  const sIndex = (pgnum - 1) * num;
+  const eIndex = sIndex + num;
+  if(tag) {
+    db.Article.find({category:reg}).sort({_id:-1}).exec((err,data) => {
+      if(err) {
+        res.send({status:400,data:null});
+        return;
+      }
+      if (sIndex <= data.length) {
+        res.send({
+          status: 200,
+          data: data.slice(sIndex, eIndex),
+          msg: '成功',
+        });
+      } else {
+        res.send({ status: 200, data: [], msg: '成功' });
+      }
+    })
+  } else {
+    res.send({ status: 200, data: null });
+  }
+} );
+
+
 //文章搜索接口 按照阅读、评论数、点赞数排序发放数据 -- ***** 评论数暂时用 阅读量来替代
-router.get("/api/article/search",(req,res) => {
+router.get('/api/article/search', (req, res) => {
   const param = req.query;
   const num = param.num ? Number(param.num) : 5;
   const pgnum = param.pgnum ? Number(param.pgnum) : 1;
   const type = param.type ? param.type : 'read';
   const sIndex = (pgnum - 1) * num;
   const eIndex = sIndex + num;
-  if(type === 'read') {
-    db.Article.find({}).sort({read:-1}).exec((err,data) => {
-      if(err) {
-        res.send({status:200,data:null});
-        return;
-      }
-      if(sIndex <= data.length) {
-        res.send({status:200,data:data.slice(sIndex,eIndex)})
-      } else {
-        res.send({status:200,data:[]})
-      }
-    })
+  if (type === 'read') {
+    db.Article.find({})
+      .sort({ read: -1 })
+      .exec((err, data) => {
+        if (err) {
+          res.send({ status: 200, data: null });
+          return;
+        }
+        if (sIndex <= data.length) {
+          res.send({ status: 200, data: data.slice(sIndex, eIndex) });
+        } else {
+          res.send({ status: 200, data: [] });
+        }
+      });
   } else if (type === 'zan') {
-    db.Article.find({}).sort({zan:-1}).exec((err,data) => {
-      if(err) {
-        res.send({status:200,data:null});
-        return;
-      }
-      if(sIndex <= data.length) {
-        res.send({status:200,data:data.slice(sIndex,eIndex)})
-      } else {
-        res.send({status:200,data:[]})
-      }
-    })
+    db.Article.find({})
+      .sort({ zan: -1 })
+      .exec((err, data) => {
+        if (err) {
+          res.send({ status: 200, data: null });
+          return;
+        }
+        if (sIndex <= data.length) {
+          res.send({ status: 200, data: data.slice(sIndex, eIndex) });
+        } else {
+          res.send({ status: 200, data: [] });
+        }
+      });
   } else {
-    db.Article.find({}).sort({read:-1}).exec((err,data) => {
-      if(err) {
-        res.send({status:200,data:null});
-        return;
-      }
-      if(sIndex <= data.length) {
-        res.send({status:200,data:data.slice(sIndex,eIndex)})
-      } else {
-        res.send({status:200,data:[]})
-      }
-    })
+    db.Article.find({})
+      .sort({ read: -1 })
+      .exec((err, data) => {
+        if (err) {
+          res.send({ status: 200, data: null });
+          return;
+        }
+        if (sIndex <= data.length) {
+          res.send({ status: 200, data: data.slice(sIndex, eIndex) });
+        } else {
+          res.send({ status: 200, data: [] });
+        }
+      });
   }
 });
 
 //文章关键词搜索
-router.get("/api/article/keywords",(req,res) => {
+router.get('/api/article/keywords', (req, res) => {
   const param = req.query;
   const kw = param.kw;
-  db.Article.find({$text:{$search:'MongoDB'}}).sort({ _id: -1 }).exec((err,data) => {
-    if(!err) {
-      res.send({status:200,data:null,msg:'失败'});
-      return;
-    }
-    res.send({status:200,data:data,msg:'成功'});
+  const num = param.num ? Number(param.num) : 5;
+  const pgnum = param.pgnum ? Number(param.pgnum) : 1;
+  let reg = new RegExp(kw, 'gi');
+  const sIndex = (pgnum - 1) * num;
+  const eIndex = sIndex + num;
+  db.Article.find({
+    $or: [{ title: { $regex: reg } }, { content: { $regex: reg } }],
   })
+    .sort({ _id: -1 })
+    .exec((err, data) => {
+      if (err) {
+        res.send({ status: 200, data: null, msg: '失败' });
+        return;
+      }
+      if (sIndex <= data.length) {
+        res.send({
+          status: 200,
+          data: data.slice(sIndex, eIndex),
+          msg: '成功',
+        });
+      } else {
+        res.send({ status: 200, data: [], msg: '成功' });
+      }
+    });
 });
 
 // 文章详情页
-router.get("/api/articleDetail/:id", function (req, res) {
+router.get('/api/articleDetail/:id', function (req, res) {
   db.Article.findOne({ _id: req.params.id }, function (err, docs) {
     if (err) {
       console.error(err);
@@ -321,14 +366,14 @@ router.get("/api/articleDetail/:id", function (req, res) {
     db.Article.find({ _id: { $gt: req.params.id } }) //上一条
       .then((res2) => {
         if (res2.length > 0) {
-          prev.title = res2[0]["title"];
-          prev._id = res2[0]["_id"];
+          prev.title = res2[0]['title'];
+          prev._id = res2[0]['_id'];
         }
         db.Article.find({ _id: { $lt: req.params.id } }) //下一条
           .then((res3) => {
             if (res3.length > 0) {
-              next.title = res3[res3.length - 1]["title"];
-              next._id = res3[res3.length - 1]["_id"];
+              next.title = res3[res3.length - 1]['title'];
+              next._id = res3[res3.length - 1]['_id'];
             }
             let obj = JSON.parse(JSON.stringify(docs));
             obj.prev = prev;
@@ -342,19 +387,19 @@ router.get("/api/articleDetail/:id", function (req, res) {
   });
 });
 //文章保存
-router.post("/api/admin/saveArticle", (req, res) => {
+router.post('/api/admin/saveArticle', (req, res) => {
   let newArticle = new db.Article(req.body.articleInformation);
   newArticle.save(function (err, article) {
     if (err) {
       res.send(err);
     } else {
-      res.send({ status: 1, msg: "保存成功" });
+      res.send({ status: 1, msg: '保存成功' });
     }
     creatTags(article);
   });
 });
 // 文章更新
-router.post("/api/admin/updateArticle", (req, res) => {
+router.post('/api/admin/updateArticle', (req, res) => {
   let info = req.body.articleInformation;
   db.Article.find({ _id: info._id }, (err, docs) => {
     if (err) {
@@ -372,13 +417,13 @@ router.post("/api/admin/updateArticle", (req, res) => {
         res.status(500).send();
         return;
       }
-      res.send({ status: 1, msg: "更新成功" });
+      res.send({ status: 1, msg: '更新成功' });
       updateTags(compare, info);
     });
   });
 });
 // 文章删除
-router.post("/api/admin/deleteArticle", (req, res) => {
+router.post('/api/admin/deleteArticle', (req, res) => {
   db.Article.findOne({ _id: req.body._id }, function (err, article) {
     if (err) return;
     db.Article.remove({ _id: req.body._id }, (err, c, b) => {
@@ -386,13 +431,13 @@ router.post("/api/admin/deleteArticle", (req, res) => {
         res.status(500).send();
         return;
       }
-      res.send({ status: 1, msg: "删除成功" });
+      res.send({ status: 1, msg: '删除成功' });
       updateTags({ add: [], del: article.category }, article);
     });
   });
 });
 //文章点赞
-router.post("/api/article/zan", (req, res) => {
+router.post('/api/article/zan', (req, res) => {
   db.Article.find({ _id: req.body._id }, (err, docs) => {
     if (err) return;
     if (!docs[0]) return;
@@ -402,7 +447,7 @@ router.post("/api/article/zan", (req, res) => {
         res.status(500).send();
         return;
       }
-      res.send({ status: 1, msg: "文章点赞成功" });
+      res.send({ status: 1, msg: '文章点赞成功' });
     });
   });
 });
