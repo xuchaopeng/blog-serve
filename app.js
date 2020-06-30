@@ -11,6 +11,7 @@ const fs = require("fs");
 
 const admin = require("./routes/admin");
 const article = require("./routes/article");
+const tags = require("./routes/tags");
 const comment = require("./routes/comment");
 const history = require("./routes/history");
 const upload = require("./routes/upload");
@@ -47,6 +48,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //路由
 app.use(admin);
 app.use(article);
+app.use(tags);
 app.use(comment);
 app.use(upload);
 app.use(history);

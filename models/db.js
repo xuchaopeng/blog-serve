@@ -36,11 +36,19 @@ const tagSchema = new mongoose.Schema({
   total: Number
 });
 
+//分类标签管理
+const tagClassSchema = new mongoose.Schema({
+  name:String,
+  data:Array,
+  total:Number
+});
+
 const Models = {
   User: mongoose.model("User", userSchema),
   Article: mongoose.model("Article", articleSchema),
   Demo: mongoose.model("Demo", demoSchema),
-  Tags: mongoose.model("Tags", tagSchema)
+  Tags: mongoose.model("Tags", tagSchema),
+  TagClass:mongoose.model('TagClass',tagClassSchema)
 };
 
 module.exports = Models;
