@@ -97,4 +97,55 @@ router.get('/api/tag/get', (req, res) => {
   });
 });
 
+//每天一句 获取
+router.get('/api/sentence/get', (req, res) => {
+  const param = req.query;
+  const num = param.num ? Number(param.num) : 6;
+  db.Sentence.find({})
+    .sort({ zan: -1 })
+    .exec((err, data) => {
+      if (err) {
+        res.send({ code: 401, data: null });
+        return;
+      }
+      res.send({ code: 200, data: data.slice(0, num) });
+    });
+});
+
+//每天一句 保存
+router.get('/api/sentence/save', (req, res) => {
+  const param = req.query;
+  const img = param.img || '';
+  const title = param.title || '';
+  if (!img || !title) {
+    res.send({ msg: '图片及标题为必传字段', code: 401 });
+    return;
+  }
+  let newSen = new db.Sentence({ title, img, url: '' });
+  newSen.save(function (err, item) {
+    if (err) {
+      res.send({ msg: '每天一句添加失败' });
+      return;
+    }
+    res.send({ msg: '每天一句添加成功', data: item });
+  });
+});
+
+//每天一句 删除
+router.get('/api/sentence/remove', (req, res) => {
+  const param = req.query;
+  const id = param._id;
+  if (!id) {
+    res.send({ msg: 'id不能为空', code: 401 });
+    return;
+  }
+  db.Sentence.deleteOne({ _id: id }, (err, c, b) => {
+    if (err) {
+      res.send({ msg: '删除失败', code: 500 });
+      return;
+    }
+    res.send({ code: 200, msg: '删除成功' });
+  });
+});
+
 module.exports = router;

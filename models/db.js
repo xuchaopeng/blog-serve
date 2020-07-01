@@ -43,12 +43,20 @@ const tagClassSchema = new mongoose.Schema({
   total:Number
 });
 
+//每天一句
+const sentenceSchema =  new mongoose.Schema({
+  title:String,
+  img:String,
+  url:String
+});
+
 const Models = {
   User: mongoose.model("User", userSchema),
   Article: mongoose.model("Article", articleSchema),
   Demo: mongoose.model("Demo", demoSchema),
   Tags: mongoose.model("Tags", tagSchema),
-  TagClass:mongoose.model('TagClass',tagClassSchema)
+  TagClass:mongoose.model('TagClass',tagClassSchema),
+  Sentence:mongoose.model('Sentence',sentenceSchema)
 };
 
 module.exports = Models;
