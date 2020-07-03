@@ -100,7 +100,7 @@ router.get('/api/tag/get', (req, res) => {
 //每天一句 获取
 router.get('/api/sentence/get', (req, res) => {
   const param = req.query;
-  const num = param.num ? Number(param.num) : 6;
+  let num = param.num ? Number(param.num) : 0;
   db.Sentence.find({})
     .sort({ zan: -1 })
     .exec((err, data) => {
@@ -108,7 +108,7 @@ router.get('/api/sentence/get', (req, res) => {
         res.send({ code: 401, data: null });
         return;
       }
-      res.send({ code: 200, data: data.slice(0, num) });
+      res.send({ code: 200, data: num ? data.slice(0, num) : data.slice(0) });
     });
 });
 
@@ -117,17 +117,19 @@ router.get('/api/sentence/save', (req, res) => {
   const param = req.query;
   const img = param.img || '';
   const title = param.title || '';
+  const date = param.date || '';
+  const url = param.url || ''
   if (!img || !title) {
     res.send({ msg: '图片及标题为必传字段', code: 401 });
     return;
   }
-  let newSen = new db.Sentence({ title, img, url: '' });
+  let newSen = new db.Sentence({ title, img, url, date });
   newSen.save(function (err, item) {
     if (err) {
       res.send({ msg: '每天一句添加失败' });
       return;
     }
-    res.send({ msg: '每天一句添加成功', data: item });
+    res.send({ msg: '每天一句添加成功', data: item});
   });
 });
 

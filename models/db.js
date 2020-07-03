@@ -47,7 +47,8 @@ const tagClassSchema = new mongoose.Schema({
 const sentenceSchema =  new mongoose.Schema({
   title:String,
   img:String,
-  url:String
+  url:String,
+  date:String
 });
 
 const Models = {
