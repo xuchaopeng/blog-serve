@@ -153,6 +153,10 @@ router.get('/api/sentence/update', (req, res) => {
       res.send({ msg: '更新失败', code: 500 });
       return;
     }
+    if (!item.length) {
+      res.send({ msg: '更新失败,该id不正确', code: 500 });
+      return;
+    }
     if (title) item[0].title = title;
     if (img) item[0].img = img;
     if (date) item[0].date = date;
