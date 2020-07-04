@@ -32,18 +32,13 @@ router.get('/api/tag/add', (req, res) => {
           res.send({ msg: '标签分类添加成功' });
         });
       } else {
-        db.TagClass.update(
-          { _id: onts._id },
-          { data: onts.data, total: onts.total },
-          { multi: true },
-          function (e, s) {
-            if (e) {
-              res.send({ msg: '标签分类添加失败' });
-              return;
-            }
-            res.send({ msg: '标签分类添加成功' });
+        db.TagClass.update({ _id: onts._id }, { data: onts.data, total: onts.total }, { multi: true }, function (e, s) {
+          if (e) {
+            res.send({ msg: '标签分类添加失败' });
+            return;
           }
-        );
+          res.send({ msg: '标签分类添加成功' });
+        });
       }
     }
   });
@@ -69,18 +64,13 @@ router.get('/api/tag/remove', (req, res) => {
         arr.findIndex((item) => item === tag),
         1
       );
-      db.TagClass.update(
-        { _id: r[0]._id },
-        { data: arr, total: r[0].total - 1 },
-        { multi: true },
-        function (e, s) {
-          if (e) {
-            res.send({ msg: '标签分类删除失败', code: 500 });
-            return;
-          }
-          res.send({ msg: '标签分类删除成功', code: 200 });
+      db.TagClass.update({ _id: r[0]._id }, { data: arr, total: r[0].total - 1 }, { multi: true }, function (e, s) {
+        if (e) {
+          res.send({ msg: '标签分类删除失败', code: 500 });
+          return;
         }
-      );
+        res.send({ msg: '标签分类删除成功', code: 200 });
+      });
     }
   });
 });
@@ -118,7 +108,7 @@ router.get('/api/sentence/save', (req, res) => {
   const img = param.img || '';
   const title = param.title || '';
   const date = param.date || '';
-  const url = param.url || ''
+  const url = param.url || '';
   if (!img || !title) {
     res.send({ msg: '图片及标题为必传字段', code: 401 });
     return;
@@ -129,7 +119,7 @@ router.get('/api/sentence/save', (req, res) => {
       res.send({ msg: '每天一句添加失败' });
       return;
     }
-    res.send({ msg: '每天一句添加成功', data: item});
+    res.send({ msg: '每天一句添加成功', data: item });
   });
 });
 
@@ -147,6 +137,32 @@ router.get('/api/sentence/remove', (req, res) => {
       return;
     }
     res.send({ code: 200, msg: '删除成功' });
+  });
+});
+
+//每天一句 更新
+router.get('/api/sentence/update', (req, res) => {
+  const param = req.query;
+  const { id, title, img, date } = param;
+  if (!id) {
+    res.send({ msg: 'id不能为空', code: 401 });
+    return;
+  }
+  db.Sentence.find({ _id: id }, (err, item) => {
+    if (err) {
+      res.send({ msg: '更新失败', code: 500 });
+      return;
+    }
+    if (title) item[0].title = title;
+    if (img) item[0].img = img;
+    if (date) item[0].date = date;
+    db.Sentence(item[0]).save(function (error) {
+      if (error) {
+        res.send({ msg: '更新失败', code: 500 });
+        return;
+      }
+      res.send({ code: 200, msg: '更新成功' });
+    });
   });
 });
 

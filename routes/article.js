@@ -32,16 +32,14 @@ const creatTags = (article) => {
         res.articles = [tagem];
       }
       res.total ? (res.total += 1) : (res.total = 1);
-      db.Tags.update(
-        { name: item },
-        { articles: res.articles, total: res.total },
-        { multi: true },
-        function (err, res1) {
-          if (err) {
-            return;
-          }
+      db.Tags.update({ name: item }, { articles: res.articles, total: res.total }, { multi: true }, function (
+        err,
+        res1
+      ) {
+        if (err) {
+          return;
         }
-      );
+      });
     });
   });
 };
@@ -69,18 +67,16 @@ const updateTags = (compare, info) => {
           });
           if (!oldInfo.length) return;
           if (oldInfo.length) res.total -= 1;
-          db.Tags.update(
-            { name: item },
-            { articles: res.articles, total: res.total },
-            { multi: true },
-            function (err, res1) {
-              if (err) {
-                // console.log(err, '删除失败');
-                return;
-              }
-              // console.log(res1, '文章tags删除成功');
+          db.Tags.update({ name: item }, { articles: res.articles, total: res.total }, { multi: true }, function (
+            err,
+            res1
+          ) {
+            if (err) {
+              // console.log(err, '删除失败');
+              return;
             }
-          );
+            // console.log(res1, '文章tags删除成功');
+          });
         }
       });
     });
@@ -234,7 +230,7 @@ router.get('/api/articlePage', (req, res) => {
 });
 
 //文章按分类搜索
-router.get('/api/article/tag', (req,res) => {
+router.get('/api/article/tag', (req, res) => {
   const param = req.query;
   const num = param.num ? Number(param.num) : 5;
   const pgnum = param.pgnum ? Number(param.pgnum) : 1;
@@ -242,27 +238,28 @@ router.get('/api/article/tag', (req,res) => {
   let reg = new RegExp(tag, 'gi');
   const sIndex = (pgnum - 1) * num;
   const eIndex = sIndex + num;
-  if(tag) {
-    db.Article.find({category:reg}).sort({_id:-1}).exec((err,data) => {
-      if(err) {
-        res.send({status:400,data:null});
-        return;
-      }
-      if (sIndex <= data.length) {
-        res.send({
-          status: 200,
-          data: data.slice(sIndex, eIndex),
-          msg: '成功',
-        });
-      } else {
-        res.send({ status: 200, data: [], msg: '成功' });
-      }
-    })
+  if (tag) {
+    db.Article.find({ category: reg })
+      .sort({ _id: -1 })
+      .exec((err, data) => {
+        if (err) {
+          res.send({ status: 400, data: null });
+          return;
+        }
+        if (sIndex <= data.length) {
+          res.send({
+            status: 200,
+            data: data.slice(sIndex, eIndex),
+            msg: '成功',
+          });
+        } else {
+          res.send({ status: 200, data: [], msg: '成功' });
+        }
+      });
   } else {
     res.send({ status: 200, data: null });
   }
-} );
-
+});
 
 //文章搜索接口 按照阅读、评论数、点赞数排序发放数据 -- ***** 评论数暂时用 阅读量来替代
 router.get('/api/article/search', (req, res) => {
