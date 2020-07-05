@@ -143,7 +143,7 @@ router.get('/api/sentence/remove', (req, res) => {
 //每天一句 更新
 router.get('/api/sentence/update', (req, res) => {
   const param = req.query;
-  const { id, title, img, date } = param;
+  const { id, title, img, date, url } = param;
   if (!id) {
     res.send({ msg: 'id不能为空', code: 401 });
     return;
@@ -160,6 +160,7 @@ router.get('/api/sentence/update', (req, res) => {
     if (title) item[0].title = title;
     if (img) item[0].img = img;
     if (date) item[0].date = date;
+    if (url) item[0].url = url;
     db.Sentence(item[0]).save(function (error) {
       if (error) {
         res.send({ msg: '更新失败', code: 500 });
