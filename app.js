@@ -27,8 +27,8 @@ const app = express();
 
 //创建http服务器
 let httpsOption = {
-  key: fs.readFileSync("./https/3968610_xcpeng.cn.key"),
-  cert: fs.readFileSync("./https/3968610_xcpeng.cn.pem")
+  key: fs.readFileSync("./https/4168717_xcpeng.cn.key"),
+  cert: fs.readFileSync("./https/4168717_xcpeng.cn.pem")
 };
 
 app.use(cors()); //跨域
@@ -70,5 +70,5 @@ app.use(function(err, req, res, next) {
 });
 
 //监听服务
-http.createServer(app).listen(8090);
+http.createServer(app).listen(80);
 https.createServer(httpsOption, app).listen(443);
